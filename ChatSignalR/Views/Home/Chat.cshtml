@@ -1,0 +1,65 @@
+﻿<style>
+    div.panel-body {
+        overflow: scroll;
+        background: url('http://subtlepatterns.com/patterns/geometry2.png');
+    }
+</style>
+<h2>ChatBox</h2>
+<div class="chat-panel panel panel-default">
+    <div class="panel-heading">
+        Hi friends,
+        <i class="fa fa-paper-plane fa-fw"></i>
+    </div>
+    <!-- /.panel-heading -->
+    <div class="panel-body" id="chat" style="height:250px;">
+        <input type="hidden" id="displayname" />
+
+        <p id="discussion"></p>
+    </div>
+    <!-- /.panel-body -->
+    <div class="panel-footer">
+        <div class="input-group">
+            <input id="message" type="text" name="message" class="form-control input-sm" placeholder="Type your message here..." />
+
+            <span class="input-group-btn">
+                <input type="button" class="btn btn-warning btn-sm" id="sendmessage" value="Send">
+
+            </span>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script src="~/Scripts/jquery.signalR-2.4.1.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <!--SignalR script to update the chat page and send messages.-->
+    <script>
+        $(function () {
+            
+            var chat = $.connection.chatHub;
+            chat.client.addNewMessageToPage = function (name, message) {
+                if (name == "Kaviya") {
+                    $('#discussion').append('<p style="background-color:#32a858; text-align:left; width:500px"><strong><img src="https://www.phplivesupport.com/pics/icons/avatars/public/avatar_4.png">'
+                        + ' </strong> ' + htmlEncode(message) + '</p>');
+                }
+                else if (name != "Kaviya") {
+                    $('#discussion').append('<p style="background-color:#d6d6c2;text-align:right;">' + htmlEncode(message) + '<strong><img src="https://www.phplivesupport.com/pics/icons/avatars/public/avatar_10.png">'
+                        + ' </strong> ' +  '</p>');
+                 
+                }
+            };
+            $('#displayname').val(prompt('Enter your name:', ''));
+            $('#message').focus();
+            $.connection.hub.start().done(function () {
+                $('#sendmessage').click(function () {
+                    chat.server.send($('#displayname').val(), $('#message').val());
+                    $('#message').val('').focus();
+                });
+            });
+        });
+        // This optional function html-encodes messages for display in the page.
+        function htmlEncode(value) {
+            var encodedValue = $('<div />').text(value).html();
+            return encodedValue;
+        }
+    </script>
+}
